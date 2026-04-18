@@ -21,6 +21,8 @@ const MAX_DELTA_MS = 50;
 
 interface SpriteLayers {
   body: PIXI.Sprite;
+  eyes: PIXI.Sprite;
+  mouth: PIXI.Sprite;
 }
 
 interface HeadShift {
@@ -72,7 +74,6 @@ export class AnimationEngine {
   private bodyTextures:  Record<string, PIXI.Texture> = {};
   private mouthTextures: Record<MouthShape, PIXI.Texture> = {} as Record<MouthShape, PIXI.Texture>;
   private eyeTextures:   Record<EyeState, PIXI.Texture> = {} as Record<EyeState, PIXI.Texture>;
-  private expressionTextures: Record<string, PIXI.Texture> = {};
 
   /** Per-frame head shift offsets — loaded from sprite-meta.json */
   private headShifts: Record<string, HeadShift[]> = {};
@@ -173,15 +174,6 @@ export class AnimationEngine {
       this.eyeTextures[state] = (eyesSheet.textures as Record<string, PIXI.Texture>)[key];
     }
 
-    // Expressions spritesheet
-    try {
-      const exprSheet = await PIXI.Assets.load<PIXI.Spritesheet>('/sprites/expressions.json');
-      if (exprSheet && exprSheet.textures) {
-        this.expressionTextures = exprSheet.textures as Record<string, PIXI.Texture>;
-      }
-    } catch {
-      // Ignored if expressions are not built
-    }
   }
 
   // ---------------------------------------------------------------------------
@@ -193,10 +185,14 @@ export class AnimationEngine {
     character.scale.set(DISPLAY_SCALE);
 
     const body = new PIXI.Sprite(this.bodyTextures['idle 0']);
+    const eyes = new PIXI.Sprite(this.eyeTextures['open']);
+    const mouth = new PIXI.Sprite(this.mouthTextures['rest']);
 
     character.addChild(body);
+    character.addChild(eyes);
+    character.addChild(mouth);
 
-    this.layers = { body };
+    this.layers = { body, eyes, mouth };
     this.app.stage.addChild(character);
   }
 
@@ -206,8 +202,15 @@ export class AnimationEngine {
 
   private attachStateMachineListener() {
     this.unsubscribe = this.sm.onChange((state) => {
-      // The render loop updates the body texture directly
-      // using the combined static expression frames. No overlays to update here.
+      const mouthTex = this.mouthTextures[state.mouth];
+      if (mouthTex && this.layers.mouth.texture !== mouthTex) {
+        this.layers.mouth.texture = mouthTex;
+      }
+
+      const eyeTex = this.eyeTextures[state.eyes];
+      if (eyeTex && this.layers.eyes.texture !== eyeTex) {
+        this.layers.eyes.texture = eyeTex;
+      }
     });
   }
 
@@ -241,19 +244,6 @@ export class AnimationEngine {
   }
 
   private setBodyFrame(anim: BodyAnimation, frame: number) {
-    if (anim === 'idle' && this.sm && Object.keys(this.expressionTextures).length > 0) {
-      const state = this.sm.getState();
-      const comboKey = `face-${state.eyes}-${state.mouth} 0`;
-      const tex = this.expressionTextures[comboKey];
-      
-      if (tex) {
-        if (this.layers.body.texture !== tex) {
-          this.layers.body.texture = tex;
-        }
-        return;
-      }
-    }
-
     const key = `${anim} ${frame}`;
     const tex = this.bodyTextures[key];
     if (tex && this.layers.body.texture !== tex) {
@@ -262,6 +252,13 @@ export class AnimationEngine {
   }
 
   private updateOverlayPositions(anim: BodyAnimation, frame: number) {
-    // Overlays have been removed; all states use full-body frames to prevent jitter.
+    if (this.headShifts[anim] && this.headShifts[anim][frame]) {
+      const shift = this.headShifts[anim][frame];
+      this.layers.eyes.position.set(shift.x, shift.y);
+      this.layers.mouth.position.set(shift.x, shift.y);
+    } else {
+      this.layers.eyes.position.set(0, 0);
+      this.layers.mouth.position.set(0, 0);
+    }
   }
 }

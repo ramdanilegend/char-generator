@@ -649,6 +649,9 @@ function drawEyesOnTile(tile, face, state, baseTile) {
   const drawOne = (ex, ey) => {
     let minEY = eh, maxEY = 0;
     let minEX = ew, maxEX = 0;
+    const leftX = new Array(eh).fill(ew);
+    const rightX = new Array(eh).fill(-1);
+
     for (let y = 0; y < eh; y++) {
       for (let x = 0; x < ew; x++) {
         const p = baseTile.get(ex + x, ey + y);
@@ -658,11 +661,33 @@ function drawEyesOnTile(tile, face, state, baseTile) {
           if (y > maxEY) maxEY = y;
           if (x < minEX) minEX = x;
           if (x > maxEX) maxEX = x;
+          if (x < leftX[y]) leftX[y] = x;
+          if (x > rightX[y]) rightX[y] = x;
         }
       }
     }
     if (minEY > maxEY) { minEY = Math.floor(eh/4); maxEY = Math.floor(eh*3/4); minEX = 1; maxEX = ew-2; }
     
+    let topCenter = 0, numTop = 0;
+    for (let y = minEY; y < minEY + 4 && y <= maxEY; y++) {
+       if (leftX[y] <= rightX[y]) {
+          topCenter += (leftX[y] + rightX[y]) / 2;
+          numTop++;
+       }
+    }
+    topCenter = numTop > 0 ? topCenter / numTop : ew / 2;
+
+    let botCenter = 0, numBot = 0;
+    for (let y = maxEY; y > maxEY - 4 && y >= minEY; y--) {
+       if (leftX[y] <= rightX[y]) {
+          botCenter += (leftX[y] + rightX[y]) / 2;
+          numBot++;
+       }
+    }
+    botCenter = numBot > 0 ? botCenter / numBot : ew / 2;
+
+    const slope = (maxEY > minEY) ? (botCenter - topCenter) / (maxEY - minEY) : 0;
+
     const actualEyeH = maxEY - minEY + 1;
     const actualEyeW = maxEX - minEX + 1;
 
@@ -676,17 +701,31 @@ function drawEyesOnTile(tile, face, state, baseTile) {
       const thickness = Math.max(1, Math.round(actualEyeH * 0.35));
       const maxDrop = Math.max(1, maxEY - minEY - thickness + 1);
       const drop = Math.round(maxDrop * pct);
+      const shiftX = drop * slope;
 
       for (let y = minEY; y <= maxEY; y++) {
-        for (let x = 0; x < ew; x++) {
-           // Overwrite the portion of the open eye covered by the closing lid
+        let lx = minEX, rx = maxEX;
+        if (leftX[y] <= rightX[y]) {
+           lx = leftX[y];
+           rx = rightX[y];
+        } else {
+           const dy = y - minEY;
+           lx = minEX + dy * slope;
+           rx = maxEX + dy * slope;
+        }
+        
+        lx = Math.floor(lx) - 3;
+        rx = Math.ceil(rx) + 3;
+
+        for (let x = lx; x <= rx; x++) {
            if (y < minEY + drop + thickness) {
               let srcY = ey + y - drop;
-              // Limit the origin to skin right above the eye to stretch the eyelid, preserving the eyelashes exactly
+              let srcX = ex + x - shiftX;
+              
               if (srcY < ey + minEY - 1) {
                  srcY = ey + minEY - 1; 
               }
-              tile.set(ex + x, ey + y, baseTile.get(ex + x, srcY));
+              tile.set(ex + x, ey + y, baseTile.getBilinear(srcX, srcY));
            }
         }
       }
@@ -925,7 +964,7 @@ function buildBodySheet(charCanvas, face) {
 function buildMouthSheet(face, baseTile) {
   const sheet = new PixelCanvas(MOUTH_SHAPES.length * TILE_W, TILE_H);
   for (let i = 0; i < MOUTH_SHAPES.length; i++) {
-    const tile = baseTile.clone();
+    const tile = new PixelCanvas(TILE_W, TILE_H); // Overlay
     drawMouthOnTile(tile, face, MOUTH_SHAPES[i], baseTile);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 0);
   }
@@ -935,7 +974,7 @@ function buildMouthSheet(face, baseTile) {
 function buildEyesSheet(face, baseTile) {
   const sheet = new PixelCanvas(EYE_STATES.length * TILE_W, TILE_H);
   for (let i = 0; i < EYE_STATES.length; i++) {
-    const tile = baseTile.clone();
+    const tile = new PixelCanvas(TILE_W, TILE_H); // Overlay
     drawEyesOnTile(tile, face, EYE_STATES[i], baseTile);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 0);
   }
