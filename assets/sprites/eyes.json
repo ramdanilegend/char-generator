@@ -1,0 +1,124 @@
+{
+  "frames": {
+    "eyes-open 0": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "eyes-half 0": {
+      "frame": {
+        "x": 48,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "eyes-closed 0": {
+      "frame": {
+        "x": 96,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "eyes-happy 0": {
+      "frame": {
+        "x": 144,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "eyes-surprised 0": {
+      "frame": {
+        "x": 192,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    }
+  },
+  "meta": {
+    "image": "eyes.png",
+    "size": {
+      "w": 240,
+      "h": 48
+    },
+    "scale": "1"
+  },
+  "animations": {
+    "eyes-open": [
+      "eyes-open 0"
+    ],
+    "eyes-half": [
+      "eyes-half 0"
+    ],
+    "eyes-closed": [
+      "eyes-closed 0"
+    ],
+    "eyes-happy": [
+      "eyes-happy 0"
+    ],
+    "eyes-surprised": [
+      "eyes-surprised 0"
+    ]
+  }
+}

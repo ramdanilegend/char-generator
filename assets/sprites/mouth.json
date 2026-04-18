@@ -1,0 +1,168 @@
+{
+  "frames": {
+    "mouth-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "mouth-open-a 0": {
+      "frame": {
+        "x": 48,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "mouth-mid-e 0": {
+      "frame": {
+        "x": 96,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "mouth-rounded-o 0": {
+      "frame": {
+        "x": 144,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "mouth-neutral-small 0": {
+      "frame": {
+        "x": 192,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "mouth-bilabial-m 0": {
+      "frame": {
+        "x": 240,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    },
+    "mouth-labiodental-f 0": {
+      "frame": {
+        "x": 288,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 100
+    }
+  },
+  "meta": {
+    "image": "mouth.png",
+    "size": {
+      "w": 336,
+      "h": 48
+    },
+    "scale": "1"
+  },
+  "animations": {
+    "mouth-rest": [
+      "mouth-rest 0"
+    ],
+    "mouth-open-a": [
+      "mouth-open-a 0"
+    ],
+    "mouth-mid-e": [
+      "mouth-mid-e 0"
+    ],
+    "mouth-rounded-o": [
+      "mouth-rounded-o 0"
+    ],
+    "mouth-neutral-small": [
+      "mouth-neutral-small 0"
+    ],
+    "mouth-bilabial-m": [
+      "mouth-bilabial-m 0"
+    ],
+    "mouth-labiodental-f": [
+      "mouth-labiodental-f 0"
+    ]
+  }
+}
