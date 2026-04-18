@@ -3,6 +3,7 @@ export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { synthesizeWithMeta } from './synthesize';
+import { approximateVisemes } from './visemeApprox';
 import type { TTSResponse } from '@/types';
 
 const VOICE_LIST_URL =
@@ -53,7 +54,19 @@ export async function POST(req: NextRequest) {
       ? Math.ceil((last.offset + last.duration) / 10_000) + 300
       : 0;
 
-    const response: TTSResponse = { audioBase64, visemes, wordBoundaries, durationMs };
+    // Edge readaloud does not emit real visemes. Fall back to an
+    // approximation derived from the word text + word boundaries so the
+    // mouth still animates during speech.
+    const effectiveVisemes = visemes.length > 0
+      ? visemes
+      : approximateVisemes(wordBoundaries);
+
+    const response: TTSResponse = {
+      audioBase64,
+      visemes: effectiveVisemes,
+      wordBoundaries,
+      durationMs,
+    };
     return NextResponse.json(response);
   } catch (err) {
     console.error('[/api/tts]', err);

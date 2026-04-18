@@ -26,6 +26,7 @@ export class TimingController {
 
   private scheduledStartTime = 0;
   private visemeTimers: ReturnType<typeof setTimeout>[] = [];
+  private speechBlinkTimers: ReturnType<typeof setTimeout>[] = [];
   private blinkTimer: ReturnType<typeof setTimeout> | null = null;
 
   private onMouthChange: MouthCallback;
@@ -54,12 +55,13 @@ export class TimingController {
   /**
    * Schedule an AudioBuffer for playback and set up viseme event callbacks.
    * Returns the absolute AudioContext time when playback will start.
+   * Must be called after a user gesture so the browser allows AudioContext to resume.
    */
-  schedulePlayback(buffer: AudioBuffer, visemes: VisemeEvent[]): number {
+  async schedulePlayback(buffer: AudioBuffer, visemes: VisemeEvent[]): Promise<number> {
     this.stop();
 
     if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      await this.ctx.resume();
     }
 
     this.scheduledStartTime = this.ctx.currentTime + PRE_ROLL;
@@ -81,6 +83,7 @@ export class TimingController {
 
     this.sourceNode = src;
     this.scheduleVisemes(visemes);
+    this.scheduleSpeechBlinks(buffer.duration);
 
     return this.scheduledStartTime;
   }
@@ -93,6 +96,8 @@ export class TimingController {
     }
     this.visemeTimers.forEach(clearTimeout);
     this.visemeTimers = [];
+    this.speechBlinkTimers.forEach(clearTimeout);
+    this.speechBlinkTimers = [];
     this.onMouthChange('rest');
   }
 
@@ -121,6 +126,30 @@ export class TimingController {
       const t = this.scheduleAt(fireAt, () => this.onMouthChange(shape));
       this.visemeTimers.push(t);
     }
+  }
+
+  /**
+   * Schedule deterministic blinks across the speech window so every
+   * recording (even a ~2s one) includes at least one blink. Also resets
+   * the autonomous ticker so it can't fire mid-clip and double-blink.
+   */
+  private scheduleSpeechBlinks(durationSec: number) {
+    if (this.blinkTimer) clearTimeout(this.blinkTimer);
+
+    // First blink ~600–900ms in; further blinks every ~2s after that.
+    const firstDelay = 600 + Math.random() * 300;
+    const interval = 2000;
+    const totalMs = Math.max(0, durationSec * 1000 + PRE_ROLL * 1000);
+
+    for (let t = firstDelay; t < totalMs - 200; t += interval + Math.random() * 400) {
+      const timer = setTimeout(() => this.onBlink(), t);
+      this.speechBlinkTimers.push(timer);
+    }
+
+    // Resume the autonomous ticker after the clip ends
+    const resumeAt = totalMs + 500;
+    const resumeTimer = setTimeout(() => this.scheduleBlink(), resumeAt);
+    this.speechBlinkTimers.push(resumeTimer);
   }
 
   /** Autonomous blink every 3–5 seconds with random jitter */

@@ -33,21 +33,21 @@ const TILE_H = 192;
 
 // --- Animation definitions ---
 const ANIMATIONS = [
-  { name: 'idle', frames: 6, row: 0, duration: 160 },
-  { name: 'walk', frames: 8, row: 1, duration: 100 },
-  { name: 'wave', frames: 10, row: 2, duration: 80 },
-  { name: 'shrug', frames: 8, row: 3, duration: 100 },
-  { name: 'nod', frames: 6, row: 4, duration: 100 },
-  { name: 'shake-head', frames: 8, row: 5, duration: 80 },
-  { name: 'point', frames: 6, row: 6, duration: 120 },
+  { name: 'idle', frames: 12, row: 0, duration: 80 },
+  { name: 'walk', frames: 16, row: 1, duration: 50 },
+  { name: 'wave', frames: 20, row: 2, duration: 40 },
+  { name: 'shrug', frames: 16, row: 3, duration: 50 },
+  { name: 'nod', frames: 12, row: 4, duration: 50 },
+  { name: 'shake-head', frames: 16, row: 5, duration: 40 },
+  { name: 'point', frames: 12, row: 6, duration: 60 },
 ];
-const MAX_COLS = 10;
+const MAX_COLS = 20;
 const NUM_ROWS = ANIMATIONS.length;
 
 const MOUTH_SHAPES = [
   'rest', 'open-a', 'mid-e', 'rounded-o', 'neutral-small', 'bilabial-m', 'labiodental-f'
 ];
-const EYE_STATES = ['open', 'half', 'closed', 'happy', 'surprised'];
+const EYE_STATES = ['open', 'close-1', 'close-2', 'close-3', 'close-4', 'closed', 'happy', 'surprised'];
 
 // ---------------------------------------------------------------------------
 // PNG writer
@@ -97,8 +97,28 @@ class PixelCanvas {
   clone() { const c = new PixelCanvas(this.w, this.h); c.data.set(this.data); return c; }
   get(x, y) {
     if (x < 0 || x >= this.w || y < 0 || y >= this.h) return [0, 0, 0, 0];
-    const i = (y * this.w + x) * 4;
+    const i = (Math.round(y) * this.w + Math.round(x)) * 4;
     return [this.data[i], this.data[i + 1], this.data[i + 2], this.data[i + 3]];
+  }
+  getBilinear(x, y) {
+    const x1 = Math.floor(x), x2 = x1 + 1;
+    const y1 = Math.floor(y), y2 = y1 + 1;
+    const fx = x - x1, fy = y - y1;
+    const p11 = this.get(x1, y1);
+    const p21 = this.get(x2, y1);
+    const p12 = this.get(x1, y2);
+    const p22 = this.get(x2, y2);
+    const interp = (c11, c21, c12, c22) => {
+       const top = c11 * (1 - fx) + c21 * fx;
+       const bot = c12 * (1 - fx) + c22 * fx;
+       return top * (1 - fy) + bot * fy;
+    };
+    return [
+       Math.round(interp(p11[0], p21[0], p12[0], p22[0])),
+       Math.round(interp(p11[1], p21[1], p12[1], p22[1])),
+       Math.round(interp(p11[2], p21[2], p12[2], p22[2])),
+       Math.round(interp(p11[3], p21[3], p12[3], p22[3]))
+    ];
   }
   set(x, y, [r, g, b, a = 255]) {
     if (x < 0 || x >= this.w || y < 0 || y >= this.h) return;
@@ -131,6 +151,58 @@ class PixelCanvas {
           Math.round(oa * 255),
         ]);
       }
+  }
+  /** Filled ellipse using midpoint algorithm */
+  fillEllipse(cx, cy, rx, ry, color) {
+    if (rx <= 0 || ry <= 0) return;
+    for (let dy = -ry; dy <= ry; dy++) {
+      const halfW = Math.round(rx * Math.sqrt(1 - (dy * dy) / (ry * ry)));
+      for (let dx = -halfW; dx <= halfW; dx++) {
+        this.set(cx + dx, cy + dy, color);
+      }
+    }
+  }
+  /** Stroke (outline only) ellipse */
+  strokeEllipse(cx, cy, rx, ry, color) {
+    if (rx <= 0 || ry <= 0) return;
+    const steps = Math.max(60, Math.round(Math.PI * (rx + ry)));
+    for (let i = 0; i < steps; i++) {
+      const angle = (2 * Math.PI * i) / steps;
+      const x = Math.round(cx + rx * Math.cos(angle));
+      const y = Math.round(cy + ry * Math.sin(angle));
+      this.set(x, y, color);
+    }
+  }
+  /** Draw an arc (portion of ellipse outline) from startAngle to endAngle (radians) */
+  drawArc(cx, cy, rx, ry, startAngle, endAngle, color, thickness = 1) {
+    const steps = Math.max(40, Math.round(Math.PI * (rx + ry)));
+    const range = endAngle - startAngle;
+    for (let i = 0; i <= steps; i++) {
+      const angle = startAngle + (range * i) / steps;
+      const bx = cx + rx * Math.cos(angle);
+      const by = cy + ry * Math.sin(angle);
+      for (let t = 0; t < thickness; t++) {
+        this.set(Math.round(bx), Math.round(by + t), color);
+      }
+    }
+  }
+  /** Filled arc sector (pie slice) */
+  fillArcSector(cx, cy, rx, ry, startAngle, endAngle, color) {
+    const steps = Math.max(40, Math.round(Math.PI * (rx + ry)));
+    const range = endAngle - startAngle;
+    for (let i = 0; i <= steps; i++) {
+      const angle = startAngle + (range * i) / steps;
+      const ex = Math.round(cx + rx * Math.cos(angle));
+      const ey = Math.round(cy + ry * Math.sin(angle));
+      // Draw line from center to edge
+      const dx = ex - cx, dy = ey - cy;
+      const len = Math.max(Math.abs(dx), Math.abs(dy), 1);
+      for (let j = 0; j <= len; j++) {
+        const px = Math.round(cx + (dx * j) / len);
+        const py = Math.round(cy + (dy * j) / len);
+        this.set(px, py, color);
+      }
+    }
   }
   isTransparent(x, y) { return this.get(x, y)[3] < 20; }
   toPNG() { return encodePNG(this.w, this.h, this.data); }
@@ -231,27 +303,36 @@ async function analyzeSource() {
   console.log(`  Face: x=${faceLeftX}-${faceRightX} y=${faceTopY}-${faceBottomY} (${faceW}×${faceH})`);
 
   // --- Eye detection ---
+  // Search within the refined face region (top 70% of face height) to avoid
+  // picking up mouth/chin pixels as eye candidates.
   const faceBlockH = faceBlock.end - faceBlock.start;
-  const eyeSearchTop = faceBlock.start;
-  const eyeSearchBottom = Math.min(Math.round(cropH * 0.30), faceBlock.end + Math.round(faceBlockH * 0.5));
+  const eyeSearchTop = faceTopY;
+  const eyeSearchBottom = Math.min(
+    Math.round(cropH * 0.55),                  // never search past 55% of sprite
+    faceTopY + Math.round(faceH * 0.70)        // top 70% of detected face
+  );
 
   function isWhitish(r, g, b, a) {
     return a > 100 && r > 200 && g > 200 && b > 200;
   }
+
+  // Use ±2 px center dead zone (was ±5) so small pixel-art sprites aren't excluded
+  const CENTER_DEAD = 2;
 
   let leftEyeWhite = [], rightEyeWhite = [];
   for (let ry = eyeSearchTop; ry <= eyeSearchBottom; ry++)
     for (let rx = faceLeftX; rx <= faceRightX; rx++) {
       const [r, g, b, a] = getPixel(rx, ry);
       if (isWhitish(r, g, b, a)) {
-        if (rx < faceCenterX - 5) leftEyeWhite.push({ x: rx, y: ry });
-        else if (rx > faceCenterX + 5) rightEyeWhite.push({ x: rx, y: ry });
+        if (rx < faceCenterX - CENTER_DEAD) leftEyeWhite.push({ x: rx, y: ry });
+        else if (rx > faceCenterX + CENTER_DEAD) rightEyeWhite.push({ x: rx, y: ry });
       }
     }
 
   let eyeLCX, eyeLCY, eyeRCX, eyeRCY;
 
-  if (leftEyeWhite.length > 20 || rightEyeWhite.length > 20) {
+  // Lower threshold from 20 → 3 so sparse white pixels (small sprites) still qualify
+  if (leftEyeWhite.length > 3 || rightEyeWhite.length > 3) {
     if (leftEyeWhite.length > 0) {
       eyeLCX = Math.round(leftEyeWhite.reduce((s, p) => s + p.x, 0) / leftEyeWhite.length);
       eyeLCY = Math.round(leftEyeWhite.reduce((s, p) => s + p.y, 0) / leftEyeWhite.length);
@@ -274,8 +355,8 @@ async function analyzeSource() {
         const [r, g, b, a] = getPixel(rx, ry);
         if (a < 100) continue;
         if (r < 80 && g < 80 && b < 80) {
-          if (rx < faceCenterX - 5) leftDark.push({ x: rx, y: ry });
-          else if (rx > faceCenterX + 5) rightDark.push({ x: rx, y: ry });
+          if (rx < faceCenterX - CENTER_DEAD) leftDark.push({ x: rx, y: ry });
+          else if (rx > faceCenterX + CENTER_DEAD) rightDark.push({ x: rx, y: ry });
         }
       }
 
@@ -296,10 +377,94 @@ async function analyzeSource() {
     console.log(`  Eyes (dark clusters): left=(${eyeLCX},${eyeLCY}) right=(${eyeRCX},${eyeRCY})`);
   }
 
+  // --- Compute actual eye bounding boxes ---
+  // Filter white/dark pixel clusters to only include pixels near the eye center,
+  // then compute tight bounding box. This avoids capturing hat/hair highlights.
+  function computeEyeBBox(centerX, centerY, eyePixels) {
+    // Max reasonable eye size: ~20% of face width, ~30% of face height
+    const maxEyeHalfW = Math.round(faceW * 0.10);
+    const maxEyeHalfH = Math.round(faceH * 0.15);
+
+    if (eyePixels && eyePixels.length > 2) {
+      // Filter to pixels within reasonable distance of the eye center
+      const nearby = eyePixels.filter(p => {
+        const dx = Math.abs(p.x - centerX);
+        const dy = Math.abs(p.y - centerY);
+        return dx <= maxEyeHalfW && dy <= maxEyeHalfH;
+      });
+
+      if (nearby.length > 2) {
+        let minEX = Infinity, maxEX = -Infinity, minEY = Infinity, maxEY = -Infinity;
+        for (const p of nearby) {
+          if (p.x < minEX) minEX = p.x;
+          if (p.x > maxEX) maxEX = p.x;
+          if (p.y < minEY) minEY = p.y;
+          if (p.y > maxEY) maxEY = p.y;
+        }
+        // Add small padding
+        const pad = 2;
+        minEX = Math.max(faceLeftX, minEX - pad);
+        maxEX = Math.min(faceRightX, maxEX + pad);
+        minEY = Math.max(faceTopY, minEY - pad);
+        maxEY = Math.min(faceBottomY, maxEY + pad);
+        return { minX: minEX, maxX: maxEX, minY: minEY, maxY: maxEY,
+                 w: maxEX - minEX + 1, h: maxEY - minEY + 1 };
+      }
+    }
+    // Fallback: estimate from face proportions
+    const estW = Math.round(faceW * 0.18);
+    const estH = Math.round(faceH * 0.30);
+    return {
+      minX: centerX - Math.floor(estW / 2), maxX: centerX + Math.ceil(estW / 2),
+      minY: centerY - Math.floor(estH / 2), maxY: centerY + Math.ceil(estH / 2),
+      w: estW, h: estH
+    };
+  }
+
+  const leftEyeBBox = computeEyeBBox(eyeLCX, eyeLCY, leftEyeWhite.length > 0 ? leftEyeWhite : null);
+  const rightEyeBBox = computeEyeBBox(eyeRCX, eyeRCY, rightEyeWhite.length > 0 ? rightEyeWhite : null);
+  console.log(`  Left eye bbox: (${leftEyeBBox.minX},${leftEyeBBox.minY})-(${leftEyeBBox.maxX},${leftEyeBBox.maxY}) ${leftEyeBBox.w}×${leftEyeBBox.h}`);
+  console.log(`  Right eye bbox: (${rightEyeBBox.minX},${rightEyeBBox.minY})-(${rightEyeBBox.maxX},${rightEyeBBox.maxY}) ${rightEyeBBox.w}×${rightEyeBBox.h}`);
+
+  // --- Detect iris and outline colors from the eye region ---
+  let irisR = 50, irisG = 80, irisB = 180, irisCnt = 0;
+  let outR = 30, outG = 30, outB = 30, outCnt = 0;
+  for (const bbox of [leftEyeBBox, rightEyeBBox]) {
+    for (let ry = bbox.minY; ry <= bbox.maxY; ry++) {
+      for (let rx = bbox.minX; rx <= bbox.maxX; rx++) {
+        const [r, g, b, a] = getPixel(rx, ry);
+        if (a < 100) continue;
+        if (isSkin(r, g, b, a) || isBackground(r, g, b, a)) continue;
+        // Dark outlines (very dark pixels)
+        if (r < 60 && g < 60 && b < 60) {
+          outR += r; outG += g; outB += b; outCnt++;
+        }
+        // Iris/pupil: colored, not white, not skin
+        else if (!isWhitish(r, g, b, a) && (r < 170 || g < 170 || b < 170)) {
+          irisR += r; irisG += g; irisB += b; irisCnt++;
+        }
+      }
+    }
+  }
+  const irisColor = irisCnt > 0
+    ? [Math.round(irisR / irisCnt), Math.round(irisG / irisCnt), Math.round(irisB / irisCnt), 255]
+    : [50, 80, 180, 255];
+  const outlineColor = outCnt > 0
+    ? [Math.round(outR / outCnt), Math.round(outG / outCnt), Math.round(outB / outCnt), 255]
+    : [30, 30, 30, 255];
+  console.log(`  Iris color: rgb(${irisColor[0]},${irisColor[1]},${irisColor[2]}) from ${irisCnt} px`);
+  console.log(`  Outline color: rgb(${outlineColor[0]},${outlineColor[1]},${outlineColor[2]}) from ${outCnt} px`);
+
   // --- Mouth detection ---
+  // Search below the eye center, up to (and slightly past) the bottom of the
+  // detected face region. The old cap of cropH*0.25 could make the window
+  // empty when the face sits high in the sprite.
   const eyeCenterYNative = Math.round((eyeLCY + eyeRCY) / 2);
-  const mouthSearchTop = eyeCenterYNative + 5;
-  const mouthSearchBottom = Math.min(Math.round(cropH * 0.25), eyeSearchBottom + Math.round(faceBlockH * 0.3));
+  const mouthSearchTop = eyeCenterYNative + 3;
+  const mouthSearchBottom = Math.min(
+    faceBottomY + Math.round(faceH * 0.25),   // allow slightly below face bottom
+    Math.round(cropH * 0.60)                   // generous absolute cap
+  );
   const insetX = Math.round(faceW * 0.15);
   let bestRow = -1, bestScore = 0;
   for (let ry = mouthSearchTop; ry <= mouthSearchBottom; ry++) {
@@ -324,6 +489,10 @@ async function analyzeSource() {
   const skinColor = sc > 0 ? [Math.round(sr / sc), Math.round(sg / sc), Math.round(sb / sc), 255] : [200, 150, 110, 255];
 
   // --- Map to tile coords ---
+  // Use the ACTUAL detected eye bounding boxes for sizing instead of guessing
+  const avgEyeW = Math.round((leftEyeBBox.w + rightEyeBBox.w) / 2);
+  const avgEyeH = Math.round((leftEyeBBox.h + rightEyeBBox.h) / 2);
+
   const eyeCY = Math.round((eyeLCY + eyeRCY) / 2);
   const tileEyeLX = mapX(eyeLCX);
   const tileEyeRX = mapX(eyeRCX);
@@ -331,10 +500,13 @@ async function analyzeSource() {
   const tileMouthCX = mapX(faceCenterX);
   const tileMouthCY = mapY(mouthCY);
 
-  const tileEyeW = Math.max(3, Math.round(faceW * 0.15 * scale));
-  const tileEyeH = Math.max(3, Math.round(faceH * 0.12 * scale));
-  const tileMouthW = Math.max(4, Math.round(faceW * 0.25 * scale));
-  const tileMouthH = Math.max(2, Math.round(faceH * 0.06 * scale));
+  // Eye sizing: use actual detected dimensions scaled to tile, with padding
+  const tileEyeW = Math.max(6, Math.round(avgEyeW * scale) + 4);
+  const tileEyeH = Math.max(5, Math.round(avgEyeH * scale) + 4);
+
+  // Mouth sizing: substantially larger for visible phoneme shapes
+  const tileMouthW = Math.max(8, Math.round(faceW * 0.35 * scale));
+  const tileMouthH = Math.max(6, Math.round(faceH * 0.18 * scale));
 
   const headBottom = mapY(faceBlock.end + Math.round(faceH * 0.5));
   const charTop = offsetY;
@@ -356,6 +528,7 @@ async function analyzeSource() {
     mouthY: tileMouthCY - Math.floor(tileMouthH / 2),
     mouthW: tileMouthW, mouthH: tileMouthH,
     skinColor,
+    irisColor, outlineColor,
     headBottom, bodyMidY, waistY, legTop,
     charTop, charBottom, charLeft, charRight, charCenterX,
   };
@@ -407,15 +580,9 @@ async function createScaledTile(analysis) {
 function shiftWholeTile(baseTile, dx, dy) {
   if (dx === 0 && dy === 0) return baseTile.clone();
   const tile = new PixelCanvas(TILE_W, TILE_H);
-  const sx = Math.round(dx);
-  const sy = Math.round(dy);
   for (let y = 0; y < TILE_H; y++) {
-    const fromY = y - sy;
-    if (fromY < 0 || fromY >= TILE_H) continue;
     for (let x = 0; x < TILE_W; x++) {
-      const fromX = x - sx;
-      if (fromX < 0 || fromX >= TILE_W) continue;
-      tile.set(x, y, baseTile.get(fromX, fromY));
+      tile.set(x, y, baseTile.getBilinear(x - dx, y - dy));
     }
   }
   return tile;
@@ -428,8 +595,6 @@ function shiftWholeTile(baseTile, dx, dy) {
 function shiftUpperRegion(baseTile, face, dx, dy, blendH = 3) {
   if (dx === 0 && dy === 0) return baseTile.clone();
   const tile = new PixelCanvas(TILE_W, TILE_H);
-  const sx = Math.round(dx);
-  const sy = Math.round(dy);
   const splitY = face.headBottom;
 
   // Draw lower body (unchanged)
@@ -437,24 +602,19 @@ function shiftUpperRegion(baseTile, face, dx, dy, blendH = 3) {
     for (let x = 0; x < TILE_W; x++)
       tile.set(x, y, baseTile.get(x, y));
 
-  // Draw upper body (shifted)
+  // Draw upper body (shifted with subpixel precision)
   for (let y = 0; y < splitY - blendH; y++) {
-    const fromY = y - sy;
     for (let x = 0; x < TILE_W; x++) {
-      const fromX = x - sx;
-      tile.set(x, y, baseTile.get(fromX, fromY));
+      tile.set(x, y, baseTile.getBilinear(x - dx, y - dy));
     }
   }
 
-  // Blend zone: interpolate between shifted and unshifted
+  // Blend zone
   for (let y = splitY - blendH; y < splitY; y++) {
-    const t = (y - (splitY - blendH)) / blendH; // 0 at top of blend, 1 at splitY
+    const t = (y - (splitY - blendH)) / blendH;
     for (let x = 0; x < TILE_W; x++) {
-      const fromX = x - sx;
-      const fromY = y - sy;
-      const shiftedPx = baseTile.get(fromX, fromY);
+      const shiftedPx = baseTile.getBilinear(x - dx, y - dy);
       const unshiftedPx = baseTile.get(x, y);
-      // Blend: t=0 → shifted, t=1 → unshifted
       const r = Math.round(shiftedPx[0] * (1 - t) + unshiftedPx[0] * t);
       const g = Math.round(shiftedPx[1] * (1 - t) + unshiftedPx[1] * t);
       const b = Math.round(shiftedPx[2] * (1 - t) + unshiftedPx[2] * t);
@@ -470,43 +630,90 @@ function shiftUpperRegion(baseTile, face, dx, dy, blendH = 3) {
 // Eye / mouth overlays (drawn at correct tile positions)
 // "open" eye and "rest" mouth = transparent (original face shows through)
 // ---------------------------------------------------------------------------
-const OL = [30, 30, 30, 255];
-const WHITE = [240, 240, 235, 255];
-const MOUTH_IN = [140, 50, 50, 255];
-const EYE_W_C = [245, 245, 245, 255];
-const IRIS_C = [50, 80, 180, 255];
-const PUP_C = [20, 20, 25, 255];
+// v7 — Shape-aware overlays using elliptical geometry
+// Colors use detected values when available, with sensible defaults.
 
-function drawEyesOnTile(tile, face, state) {
-  if (state === 'open') return; // transparent = original face shown
+const WHITE = [240, 240, 235, 255];
+const PUP_C = [20, 20, 25, 255];
+const MOUTH_IN = [140, 50, 50, 255];
+const TONGUE_C = [180, 80, 80, 255];
+const TEETH_C = [245, 245, 240, 255];
+const LIP_DARK = [120, 45, 45, 255];
+
+function drawEyesOnTile(tile, face, state, baseTile) {
+  if (state === 'open') return;
 
   const ew = face.eyeW, eh = face.eyeH;
-  const drawOne = (x, y) => {
-    if (state === 'half') {
-      tile.fillRect(x, y, ew, eh, face.skinColor);
-      const halfY = y + Math.floor(eh * 0.6);
-      tile.fillRect(x, halfY, ew, eh - Math.floor(eh * 0.6), EYE_W_C);
-      tile.fillRect(x, halfY, ew, 1, OL);
-    } else if (state === 'closed') {
-      tile.fillRect(x, y, ew, eh, face.skinColor);
-      const midY = y + Math.floor(eh / 2);
-      tile.fillRect(x, midY, ew, 1, OL);
-      if (ew > 3) tile.fillRect(x + 1, midY + 1, ew - 2, 1, OL);
+  const OL = face.outlineColor || [30, 30, 30, 255];
+
+  const drawOne = (ex, ey) => {
+    let minEY = eh, maxEY = 0;
+    let minEX = ew, maxEX = 0;
+    for (let y = 0; y < eh; y++) {
+      for (let x = 0; x < ew; x++) {
+        const p = baseTile.get(ex + x, ey + y);
+        const isSkin = Math.abs(p[0]-face.skinColor[0])<40 && Math.abs(p[1]-face.skinColor[1])<40 && Math.abs(p[2]-face.skinColor[2])<40;
+        if (!isSkin && p[3] > 0) {
+          if (y < minEY) minEY = y;
+          if (y > maxEY) maxEY = y;
+          if (x < minEX) minEX = x;
+          if (x > maxEX) maxEX = x;
+        }
+      }
+    }
+    if (minEY > maxEY) { minEY = Math.floor(eh/4); maxEY = Math.floor(eh*3/4); minEX = 1; maxEX = ew-2; }
+    
+    const actualEyeH = maxEY - minEY + 1;
+    const actualEyeW = maxEX - minEX + 1;
+
+    if (state.startsWith('close-') || state === 'closed') {
+      let pct = 1.0;
+      if (state.startsWith('close-')) {
+        const matches = state.match(/close-(\d+)/);
+        if (matches) pct = parseInt(matches[1]) / 4.0;
+      }
+
+      const thickness = Math.max(1, Math.round(actualEyeH * 0.35));
+      const maxDrop = Math.max(1, maxEY - minEY - thickness + 1);
+      const drop = Math.round(maxDrop * pct);
+
+      for (let y = minEY; y <= maxEY; y++) {
+        for (let x = 0; x < ew; x++) {
+           // Overwrite the portion of the open eye covered by the closing lid
+           if (y < minEY + drop + thickness) {
+              let srcY = ey + y - drop;
+              // Limit the origin to skin right above the eye to stretch the eyelid, preserving the eyelashes exactly
+              if (srcY < ey + minEY - 1) {
+                 srcY = ey + minEY - 1; 
+              }
+              tile.set(ex + x, ey + y, baseTile.get(ex + x, srcY));
+           }
+        }
+      }
     } else if (state === 'happy') {
-      tile.fillRect(x, y, ew, eh, face.skinColor);
-      const midY = y + Math.floor(eh / 2);
-      tile.set(x, midY, OL);
-      tile.set(x + ew - 1, midY, OL);
-      for (let dx = 1; dx < ew - 1; dx++) tile.set(x + dx, midY + 1, OL);
+      const skinTopY = Math.max(0, ey + minEY - 1);
+      const midY = minEY + Math.floor(actualEyeH / 2);
+      for (let y = 0; y < eh; y++) {
+        for (let x = 0; x < ew; x++) {
+          tile.set(ex + x, ey + y, baseTile.get(ex + x, skinTopY));
+        }
+      }
+      for (let x = minEX; x <= maxEX; x++) {
+        const dx = x - (minEX + actualEyeW/2);
+        const dy = Math.abs(dx) < actualEyeW/3 ? 0 : 1; 
+        tile.set(ex + x, ey + midY + dy, OL);
+      }
     } else if (state === 'surprised') {
-      tile.fillRect(x - 1, y - 1, ew + 2, eh + 2, EYE_W_C);
-      tile.fillRect(x - 1, y - 1, ew + 2, 1, OL);
-      tile.fillRect(x - 1, y + eh, ew + 2, 1, OL);
-      const pcx = x + Math.floor(ew / 2), pcy = y + Math.floor(eh / 2);
-      tile.set(pcx, pcy, PUP_C);
-      tile.set(pcx - 1, pcy, IRIS_C);
-      tile.set(pcx + 1, pcy, IRIS_C);
-      tile.set(pcx, pcy - 1, IRIS_C);
+      const skinBotY = Math.min(TILE_H - 1, ey + maxEY + 1);
+      for (let y = 0; y < eh; y++) {
+        for (let x = 0; x < ew; x++) {
+          if (y >= minEY - 1 && y <= maxEY) {
+             tile.set(ex + x, ey + y, baseTile.get(ex + x, ey + y + 1));
+          } else if (y === maxEY + 1) {
+             tile.set(ex + x, ey + y, baseTile.get(ex + x, skinBotY));
+          }
+        }
+      }
     }
   };
 
@@ -514,39 +721,114 @@ function drawEyesOnTile(tile, face, state) {
   drawOne(face.eyeRX, face.eyeY);
 }
 
-function drawMouthOnTile(tile, face, shape) {
+function drawMouthOnTile(tile, face, shape, baseTile) {
   if (shape === 'rest') return;
 
   const mx = face.mouthX, my = face.mouthY;
   const mw = face.mouthW, mh = face.mouthH;
 
-  tile.fillRect(mx - 1, my - 1, mw + 2, mh + 2, face.skinColor);
+  let minMY = mh, maxMY = 0;
+  let minMX = mw, maxMX = 0;
+  for (let y = 0; y < mh; y++) {
+    for (let x = 0; x < mw; x++) {
+      const p = baseTile.get(mx + x, my + y);
+      const isSkin = Math.abs(p[0]-face.skinColor[0])<40 && Math.abs(p[1]-face.skinColor[1])<40 && Math.abs(p[2]-face.skinColor[2])<40;
+      if (!isSkin && p[3] > 0) {
+        if (y < minMY) minMY = y;
+        if (y > maxMY) maxMY = y;
+        if (x < minMX) minMX = x;
+        if (x > maxMX) maxMX = x;
+      }
+    }
+  }
+  if (minMY > maxMY) { minMY = Math.floor(mh/4); maxMY = Math.floor(mh*3/4); minMX = 2; maxMX = mw-3; }
+
+  const actualW = maxMX - minMX + 1;
+  const actualH = maxMY - minMY + 1;
+  const midMY = minMY + Math.floor(actualH / 2);
 
   if (shape === 'open-a') {
-    tile.fillRect(mx, my, mw, 1, OL);
-    tile.fillRect(mx, my + 1, mw, mh, MOUTH_IN);
-    if (mh > 1) tile.fillRect(mx + 1, my + 1, Math.max(1, mw - 2), 1, WHITE);
-    tile.fillRect(mx, my + mh + 1, mw, 1, OL);
+    for (let y = 0; y < mh; y++) {
+      for (let x = 0; x < mw; x++) {
+        if (y < midMY) {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
+        } else if (y === midMY) {
+          const p = baseTile.get(mx + x, my + y);
+          const isSkin = Math.abs(p[0]-face.skinColor[0])<40 && Math.abs(p[1]-face.skinColor[1])<40 && Math.abs(p[2]-face.skinColor[2])<40;
+          if (x >= minMX + 1 && x <= maxMX - 1 && !isSkin) {
+            tile.set(mx + x, my + y, [60, 20, 20, 255]);
+          } else {
+            tile.set(mx + x, my + y, p);
+          }
+        } else {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y - 1));
+        }
+      }
+    }
   } else if (shape === 'mid-e') {
-    tile.fillRect(mx, my, mw, 1, OL);
-    tile.fillRect(mx, my + 1, mw, Math.max(1, Math.floor(mh * 0.5)), MOUTH_IN);
-    tile.fillRect(mx + 1, my + 1, Math.max(1, mw - 2), 1, WHITE);
+    for (let y = 0; y < mh; y++) {
+      for (let x = 0; x < mw; x++) {
+         tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
+      }
+    }
+    tile.set(mx + minMX - 1, my + midMY, baseTile.get(mx + minMX, my + midMY));
+    tile.set(mx + maxMX + 1, my + midMY, baseTile.get(mx + maxMX, my + midMY));
   } else if (shape === 'rounded-o') {
-    const ow = Math.max(2, Math.round(mw * 0.5));
-    const ox = mx + Math.round((mw - ow) / 2);
-    tile.fillRect(ox, my, ow, 1, OL);
-    tile.fillRect(ox, my + 1, ow, Math.max(1, mh), MOUTH_IN);
-    tile.fillRect(ox, my + mh + 1, ow, 1, OL);
+    for (let y = 0; y < mh; y++) {
+      for (let x = 0; x < mw; x++) {
+        if (x === minMX || x === maxMX) {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + (y < midMY ? minMY-1 : maxMY+1)));
+        } else if (y === midMY) {
+          if (x > minMX && x < maxMX) tile.set(mx + x, my + y, [60, 20, 20, 255]);
+        } else if (y > midMY) {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y - 1));
+        } else {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
+        }
+      }
+    }
   } else if (shape === 'neutral-small') {
-    tile.fillRect(mx + 1, my + Math.floor(mh / 2), Math.max(1, mw - 2), 1, OL);
+    for (let y = 0; y < mh; y++) {
+      for (let x = 0; x < mw; x++) {
+        if (y > midMY && x > minMX && x < maxMX) {
+           tile.set(mx + x, my + y, baseTile.get(mx + x, my + y - 1));
+        } else if (y === midMY && x > minMX && x < maxMX) {
+           tile.set(mx + x, my + y, [60, 20, 20, 255]);
+        } else {
+           tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
+        }
+      }
+    }
   } else if (shape === 'bilabial-m') {
-    tile.fillRect(mx, my + Math.floor(mh / 2), mw, 1, OL);
-    tile.fillRect(mx, my + Math.floor(mh / 2) + 1, mw, 1, OL);
+    for (let y = 0; y < mh; y++) {
+      for (let x = 0; x < mw; x++) {
+        if (y === midMY) {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
+        } else if (y >= minMY && y <= maxMY) {
+          const p = baseTile.get(mx + x, my + y);
+          const isSkin = Math.abs(p[0]-face.skinColor[0])<40 && Math.abs(p[1]-face.skinColor[1])<40 && Math.abs(p[2]-face.skinColor[2])<40;
+          if (!isSkin) {
+             tile.set(mx + x, my + y, baseTile.get(mx + x, y < midMY ? my + minMY - 1 : my + maxMY + 1));
+          } else {
+             tile.set(mx + x, my + y, p); 
+          }
+        }
+      }
+    }
   } else if (shape === 'labiodental-f') {
-    const hw = Math.max(2, Math.round(mw * 0.7));
-    const ox = mx + Math.round((mw - hw) / 2);
-    tile.fillRect(ox, my + Math.floor(mh / 2), hw, 1, WHITE);
-    tile.fillRect(ox, my + Math.floor(mh / 2) + 1, hw, 1, OL);
+    for (let y = 0; y < mh; y++) {
+      for (let x = 0; x < mw; x++) {
+        if (y < midMY) {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
+        } else if (y === midMY && x > minMX && x < maxMX) {
+          tile.set(mx + x, my + y, [245, 245, 240, 255]); 
+        } else if (y > midMY && y <= maxMY + 1) {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y - 1));
+        } else {
+          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
+        }
+      }
+    }
   }
 }
 
@@ -563,67 +845,75 @@ function buildBodySheet(charCanvas, face) {
   // Collect headShifts for metadata so the engine can position eyes/mouth
   const headShifts = {};
 
-  // Row 0: IDLE — gentle breathing bob (whole tile vertical shift)
-  const idleBobs = [0, -1, -2, -2, -1, 0];
+  function interpolateArray(arr) {
+    const res = [];
+    for (let i = 0; i < arr.length; i++) {
+      const next = arr[(i + 1) % arr.length];
+      res.push(arr[i]);
+      res.push(arr[i] + (next - arr[i]) / 2);
+    }
+    return res;
+  }
+
+  // Row 0: IDLE
+  const idleBobs = Array(12).fill(0);
   headShifts['idle'] = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 12; i++) {
     const tile = shiftWholeTile(baseTile, 0, idleBobs[i]);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 0);
     headShifts['idle'].push({ x: 0, y: idleBobs[i] });
   }
 
-  // Row 1: WALK — whole tile shift (slight left-right sway + vertical bob)
-  // Simulates walking motion without splitting the character
-  const walkBobY = [0, -1, -2, -1, 0, -1, -2, -1];
-  const walkSwayX = [0, 1, 2, 1, 0, -1, -2, -1];
+  // Row 1: WALK
+  const walkBobY = interpolateArray([0, -1, -2, -1, 0, -1, -2, -1]);
+  const walkSwayX = interpolateArray([0, 1, 2, 1, 0, -1, -2, -1]);
   headShifts['walk'] = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 16; i++) {
     const tile = shiftWholeTile(baseTile, walkSwayX[i], walkBobY[i]);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, TILE_H);
     headShifts['walk'].push({ x: walkSwayX[i], y: walkBobY[i] });
   }
 
-  // Row 2: WAVE — whole tile stays, no body splitting
-  // Simple subtle lean + the body stays intact
-  const waveLean = [0, 0, -1, -1, -1, -1, -1, -1, 0, 0];
+  // Row 2: WAVE
+  const waveLean = interpolateArray([0, 0, -1, -1, -1, -1, -1, -1, 0, 0]);
   headShifts['wave'] = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     const tile = shiftWholeTile(baseTile, 0, waveLean[i]);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 2 * TILE_H);
     headShifts['wave'].push({ x: 0, y: waveLean[i] });
   }
 
-  // Row 3: SHRUG — whole tile shift up slightly (raising shoulders = entire body rises)
-  const shrugShift = [0, -1, -2, -3, -3, -2, -1, 0];
+  // Row 3: SHRUG
+  const shrugShift = interpolateArray([0, -1, -2, -3, -3, -2, -1, 0]);
   headShifts['shrug'] = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 16; i++) {
     const tile = shiftWholeTile(baseTile, 0, shrugShift[i]);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 3 * TILE_H);
     headShifts['shrug'].push({ x: 0, y: shrugShift[i] });
   }
 
-  // Row 4: NOD — shift head/upper body down with blending
-  const nodShifts = [0, 2, 3, 3, 2, 0];
+  // Row 4: NOD
+  const nodShifts = interpolateArray([0, 2, 3, 3, 2, 0]);
   headShifts['nod'] = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 12; i++) {
     const tile = shiftUpperRegion(baseTile, face, 0, nodShifts[i], 4);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 4 * TILE_H);
     headShifts['nod'].push({ x: 0, y: nodShifts[i] });
   }
 
-  // Row 5: SHAKE-HEAD — shift head/upper body left-right with blending
-  const shakeShifts = [0, -2, -3, -2, 0, 2, 3, 2];
+  // Row 5: SHAKE-HEAD
+  const shakeShifts = interpolateArray([0, -2, -3, -2, 0, 2, 3, 2]);
   headShifts['shake-head'] = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 16; i++) {
     const tile = shiftUpperRegion(baseTile, face, shakeShifts[i], 0, 4);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 5 * TILE_H);
     headShifts['shake-head'].push({ x: shakeShifts[i], y: 0 });
   }
 
-  // Row 6: POINT — whole tile slight lean forward
-  const pointLean = [0, -1, -1, -1, -1, 0];
+  // Row 6: POINT
+  const pointLean = interpolateArray([0, -1, -1, -1, -1, 0]);
   headShifts['point'] = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 12; i++) {
     const tile = shiftWholeTile(baseTile, 0, pointLean[i]);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 6 * TILE_H);
     headShifts['point'].push({ x: 0, y: pointLean[i] });
@@ -632,21 +922,21 @@ function buildBodySheet(charCanvas, face) {
   return { sheet, headShifts };
 }
 
-function buildMouthSheet(face) {
+function buildMouthSheet(face, baseTile) {
   const sheet = new PixelCanvas(MOUTH_SHAPES.length * TILE_W, TILE_H);
   for (let i = 0; i < MOUTH_SHAPES.length; i++) {
-    const tile = new PixelCanvas(TILE_W, TILE_H);
-    drawMouthOnTile(tile, face, MOUTH_SHAPES[i]);
+    const tile = baseTile.clone();
+    drawMouthOnTile(tile, face, MOUTH_SHAPES[i], baseTile);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 0);
   }
   return sheet;
 }
 
-function buildEyesSheet(face) {
+function buildEyesSheet(face, baseTile) {
   const sheet = new PixelCanvas(EYE_STATES.length * TILE_W, TILE_H);
   for (let i = 0; i < EYE_STATES.length; i++) {
-    const tile = new PixelCanvas(TILE_W, TILE_H);
-    drawEyesOnTile(tile, face, EYE_STATES[i]);
+    const tile = baseTile.clone();
+    drawEyesOnTile(tile, face, EYE_STATES[i], baseTile);
     sheet.blit(tile, 0, 0, TILE_W, TILE_H, i * TILE_W, 0);
   }
   return sheet;
@@ -693,6 +983,31 @@ function makeEyesJSON() {
   return { frames, animations, meta: { image: 'eyes.png', size: { w: EYE_STATES.length * TILE_W, h: TILE_H }, scale: '1' } };
 }
 
+function buildExpressionsSheet(face, baseTile) {
+  const sheet = new PixelCanvas(MOUTH_SHAPES.length * TILE_W, EYE_STATES.length * TILE_H);
+  for (let r = 0; r < EYE_STATES.length; r++) {
+    for (let c = 0; c < MOUTH_SHAPES.length; c++) {
+      const compositeTile = baseTile.clone();
+      drawMouthOnTile(compositeTile, face, MOUTH_SHAPES[c], baseTile);
+      drawEyesOnTile(compositeTile, face, EYE_STATES[r], baseTile);
+      sheet.blit(compositeTile, 0, 0, TILE_W, TILE_H, c * TILE_W, r * TILE_H);
+    }
+  }
+  return sheet;
+}
+
+function makeExpressionsJSON() {
+  const frames = {}, animations = {};
+  EYE_STATES.forEach((eyeState, r) => {
+    MOUTH_SHAPES.forEach((mouthShape, c) => {
+      const key = `face-${eyeState}-${mouthShape} 0`;
+      frames[key] = { frame: { x: c * TILE_W, y: r * TILE_H, w: TILE_W, h: TILE_H }, spriteSourceSize: { x: 0, y: 0, w: TILE_W, h: TILE_H }, sourceSize: { w: TILE_W, h: TILE_H }, duration: 100 };
+      animations[`face-${eyeState}-${mouthShape}`] = [key];
+    });
+  });
+  return { frames, animations, meta: { image: 'expressions.png', size: { w: MOUTH_SHAPES.length * TILE_W, h: EYE_STATES.length * TILE_H }, scale: '1' } };
+}
+
 function writeSpriteMeta(face, headShifts) {
   fs.writeFileSync(path.join(OUT_DIR, 'sprite-meta.json'), JSON.stringify({
     tileW: TILE_W, tileH: TILE_H,
@@ -726,14 +1041,19 @@ fs.writeFileSync(path.join(OUT_DIR, 'body.png'), bodySheet.toPNG());
 fs.writeFileSync(path.join(OUT_DIR, 'body.json'), JSON.stringify(makeBodyJSON(), null, 2));
 
 console.log('Building mouth sheet...');
-const mouthSheet = buildMouthSheet(face);
+const mouthSheet = buildMouthSheet(face, charCanvas);
 fs.writeFileSync(path.join(OUT_DIR, 'mouth.png'), mouthSheet.toPNG());
 fs.writeFileSync(path.join(OUT_DIR, 'mouth.json'), JSON.stringify(makeMouthJSON(), null, 2));
 
 console.log('Building eyes sheet...');
-const eyesSheet = buildEyesSheet(face);
+const eyesSheet = buildEyesSheet(face, charCanvas);
 fs.writeFileSync(path.join(OUT_DIR, 'eyes.png'), eyesSheet.toPNG());
 fs.writeFileSync(path.join(OUT_DIR, 'eyes.json'), JSON.stringify(makeEyesJSON(), null, 2));
+
+console.log('Building full-face expressions sheet...');
+const expressionsSheet = buildExpressionsSheet(face, charCanvas);
+fs.writeFileSync(path.join(OUT_DIR, 'expressions.png'), expressionsSheet.toPNG());
+fs.writeFileSync(path.join(OUT_DIR, 'expressions.json'), JSON.stringify(makeExpressionsJSON(), null, 2));
 
 writeSpriteMeta(face, headShifts);
 

@@ -63,16 +63,31 @@ export class StateMachine {
     }
   }
 
-  /** Trigger a blink: close → reopen after ~160ms */
   triggerBlink() {
     if (this.state.isBlinking) return;
-    this.patch({ isBlinking: true, eyes: 'closed' });
-    setTimeout(() => {
-      this.patch({ eyes: 'half' });
-      setTimeout(() => {
-        this.patch({ isBlinking: false, eyes: 'open' });
-      }, 80);
-    }, 80);
+    this.patch({ isBlinking: true, eyes: 'close-1' });
+
+    const phases = [
+      { state: 'close-2', ms: 25 },
+      { state: 'close-3', ms: 25 },
+      { state: 'closed', ms: 30 },
+      { state: 'close-3', ms: 30 },
+      { state: 'close-2', ms: 25 },
+      { state: 'close-1', ms: 25 },
+      { state: 'open', ms: 30 },
+    ];
+
+    let delay = 30;
+    for (let i = 0; i < phases.length; i++) {
+        setTimeout(() => {
+            const isLast = i === phases.length - 1;
+            this.patch({
+                eyes: phases[i].state as EyeState,
+                isBlinking: !isLast
+            });
+        }, delay);
+        delay += phases[i].ms;
+    }
   }
 
   // ---- Subscriptions ----

@@ -40,6 +40,10 @@ export default function CharacterCanvas({ onReady, onStateChange, onPlaybackEnd 
   const recorderRef  = useRef<VideoRecorder | null>(null);
   const readyRef     = useRef(false);
   const sizeRef      = useRef({ w: 168, h: 240 }); // default 56×80 @ 3×
+  // Set to true when the caller wants the next speak() call to be recorded.
+  // The actual recorder.start() happens just before audio playback begins,
+  // after synthesis completes, so no leading silence is captured.
+  const pendingRecordRef = useRef(false);
 
   const handleRef = useRef<CharacterCanvasHandle>({
     isReady: false,
@@ -98,30 +102,48 @@ export default function CharacterCanvas({ onReady, onStateChange, onPlaybackEnd 
         isReady: true,
         speak: (text, voice, gestures = []) => {
           sm.setListening();
+
+          // Resume AudioContext immediately while still in the user-gesture
+          // call stack. If we wait until after the async synthesize() network
+          // call the browser may have revoked the activation token, causing
+          // ctx.resume() to silently fail and scheduling to use stale time.
+          void tc.audioContext.resume();
+
           return new Promise<void>(async (resolve, reject) => {
             playbackResolve = resolve;
             try {
               const tts = await synthesize(text, voice);
               const buffer = await decodeAudio(tts.audioBase64, tc.audioContext);
 
-              // Schedule pre-announced gestures
-              const startTime = tc.schedulePlayback(buffer, tts.visemes);
+              // Start recording NOW — just before audio plays — so the recorded
+              // clip matches the TTS duration with no leading synthesis silence.
+              if (pendingRecordRef.current) {
+                const canvas = engine.canvas;
+                if (!canvas) throw new Error('Canvas not ready');
+                recorder.start(canvas, tc.recordingStream);
+                pendingRecordRef.current = false;
+              }
+
+              // schedulePlayback is now async: it awaits ctx.resume() internally
+              // to guarantee the AudioContext is running before deriving startTime.
+              const startTime = await tc.schedulePlayback(buffer, tts.visemes);
               const nowMs = tc.audioContext.currentTime * 1000;
               for (const g of gestures) {
                 const delayMs = Math.max(0, (startTime * 1000 + g.timeMs) - nowMs);
                 gs.enqueue({ gesture: g.gesture, delayMs });
               }
             } catch (err) {
+              pendingRecordRef.current = false;
               playbackResolve = null;
               sm.setIdle();
               reject(err);
             }
           });
         },
+        // Mark that the next speak() should capture a recording.
+        // The recorder actually starts after synthesis so no silence is prepended.
         startRecording: () => {
-          const canvas = engine.canvas;
-          if (!canvas) throw new Error('Canvas not ready');
-          recorder.start(canvas, tc.recordingStream);
+          pendingRecordRef.current = true;
         },
         stopRecording: () => recorder.stop(),
         queueGesture: (req) => gs.enqueue(req),

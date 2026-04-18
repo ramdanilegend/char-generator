@@ -1,0 +1,1246 @@
+{
+  "frames": {
+    "face-open-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-open-open-a 0": {
+      "frame": {
+        "x": 128,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-open-mid-e 0": {
+      "frame": {
+        "x": 256,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-open-rounded-o 0": {
+      "frame": {
+        "x": 384,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-open-neutral-small 0": {
+      "frame": {
+        "x": 512,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-open-bilabial-m 0": {
+      "frame": {
+        "x": 640,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-open-labiodental-f 0": {
+      "frame": {
+        "x": 768,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-1-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 192,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-1-open-a 0": {
+      "frame": {
+        "x": 128,
+        "y": 192,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-1-mid-e 0": {
+      "frame": {
+        "x": 256,
+        "y": 192,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-1-rounded-o 0": {
+      "frame": {
+        "x": 384,
+        "y": 192,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-1-neutral-small 0": {
+      "frame": {
+        "x": 512,
+        "y": 192,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-1-bilabial-m 0": {
+      "frame": {
+        "x": 640,
+        "y": 192,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-1-labiodental-f 0": {
+      "frame": {
+        "x": 768,
+        "y": 192,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-2-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 384,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-2-open-a 0": {
+      "frame": {
+        "x": 128,
+        "y": 384,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-2-mid-e 0": {
+      "frame": {
+        "x": 256,
+        "y": 384,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-2-rounded-o 0": {
+      "frame": {
+        "x": 384,
+        "y": 384,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-2-neutral-small 0": {
+      "frame": {
+        "x": 512,
+        "y": 384,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-2-bilabial-m 0": {
+      "frame": {
+        "x": 640,
+        "y": 384,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-2-labiodental-f 0": {
+      "frame": {
+        "x": 768,
+        "y": 384,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-3-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 576,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-3-open-a 0": {
+      "frame": {
+        "x": 128,
+        "y": 576,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-3-mid-e 0": {
+      "frame": {
+        "x": 256,
+        "y": 576,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-3-rounded-o 0": {
+      "frame": {
+        "x": 384,
+        "y": 576,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-3-neutral-small 0": {
+      "frame": {
+        "x": 512,
+        "y": 576,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-3-bilabial-m 0": {
+      "frame": {
+        "x": 640,
+        "y": 576,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-3-labiodental-f 0": {
+      "frame": {
+        "x": 768,
+        "y": 576,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-4-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 768,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-4-open-a 0": {
+      "frame": {
+        "x": 128,
+        "y": 768,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-4-mid-e 0": {
+      "frame": {
+        "x": 256,
+        "y": 768,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-4-rounded-o 0": {
+      "frame": {
+        "x": 384,
+        "y": 768,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-4-neutral-small 0": {
+      "frame": {
+        "x": 512,
+        "y": 768,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-4-bilabial-m 0": {
+      "frame": {
+        "x": 640,
+        "y": 768,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-close-4-labiodental-f 0": {
+      "frame": {
+        "x": 768,
+        "y": 768,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-closed-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 960,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-closed-open-a 0": {
+      "frame": {
+        "x": 128,
+        "y": 960,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-closed-mid-e 0": {
+      "frame": {
+        "x": 256,
+        "y": 960,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-closed-rounded-o 0": {
+      "frame": {
+        "x": 384,
+        "y": 960,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-closed-neutral-small 0": {
+      "frame": {
+        "x": 512,
+        "y": 960,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-closed-bilabial-m 0": {
+      "frame": {
+        "x": 640,
+        "y": 960,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-closed-labiodental-f 0": {
+      "frame": {
+        "x": 768,
+        "y": 960,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-happy-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 1152,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-happy-open-a 0": {
+      "frame": {
+        "x": 128,
+        "y": 1152,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-happy-mid-e 0": {
+      "frame": {
+        "x": 256,
+        "y": 1152,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-happy-rounded-o 0": {
+      "frame": {
+        "x": 384,
+        "y": 1152,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-happy-neutral-small 0": {
+      "frame": {
+        "x": 512,
+        "y": 1152,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-happy-bilabial-m 0": {
+      "frame": {
+        "x": 640,
+        "y": 1152,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-happy-labiodental-f 0": {
+      "frame": {
+        "x": 768,
+        "y": 1152,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-surprised-rest 0": {
+      "frame": {
+        "x": 0,
+        "y": 1344,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-surprised-open-a 0": {
+      "frame": {
+        "x": 128,
+        "y": 1344,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-surprised-mid-e 0": {
+      "frame": {
+        "x": 256,
+        "y": 1344,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-surprised-rounded-o 0": {
+      "frame": {
+        "x": 384,
+        "y": 1344,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-surprised-neutral-small 0": {
+      "frame": {
+        "x": 512,
+        "y": 1344,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-surprised-bilabial-m 0": {
+      "frame": {
+        "x": 640,
+        "y": 1344,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    },
+    "face-surprised-labiodental-f 0": {
+      "frame": {
+        "x": 768,
+        "y": 1344,
+        "w": 128,
+        "h": 192
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 192
+      },
+      "duration": 100
+    }
+  },
+  "animations": {
+    "face-open-rest": [
+      "face-open-rest 0"
+    ],
+    "face-open-open-a": [
+      "face-open-open-a 0"
+    ],
+    "face-open-mid-e": [
+      "face-open-mid-e 0"
+    ],
+    "face-open-rounded-o": [
+      "face-open-rounded-o 0"
+    ],
+    "face-open-neutral-small": [
+      "face-open-neutral-small 0"
+    ],
+    "face-open-bilabial-m": [
+      "face-open-bilabial-m 0"
+    ],
+    "face-open-labiodental-f": [
+      "face-open-labiodental-f 0"
+    ],
+    "face-close-1-rest": [
+      "face-close-1-rest 0"
+    ],
+    "face-close-1-open-a": [
+      "face-close-1-open-a 0"
+    ],
+    "face-close-1-mid-e": [
+      "face-close-1-mid-e 0"
+    ],
+    "face-close-1-rounded-o": [
+      "face-close-1-rounded-o 0"
+    ],
+    "face-close-1-neutral-small": [
+      "face-close-1-neutral-small 0"
+    ],
+    "face-close-1-bilabial-m": [
+      "face-close-1-bilabial-m 0"
+    ],
+    "face-close-1-labiodental-f": [
+      "face-close-1-labiodental-f 0"
+    ],
+    "face-close-2-rest": [
+      "face-close-2-rest 0"
+    ],
+    "face-close-2-open-a": [
+      "face-close-2-open-a 0"
+    ],
+    "face-close-2-mid-e": [
+      "face-close-2-mid-e 0"
+    ],
+    "face-close-2-rounded-o": [
+      "face-close-2-rounded-o 0"
+    ],
+    "face-close-2-neutral-small": [
+      "face-close-2-neutral-small 0"
+    ],
+    "face-close-2-bilabial-m": [
+      "face-close-2-bilabial-m 0"
+    ],
+    "face-close-2-labiodental-f": [
+      "face-close-2-labiodental-f 0"
+    ],
+    "face-close-3-rest": [
+      "face-close-3-rest 0"
+    ],
+    "face-close-3-open-a": [
+      "face-close-3-open-a 0"
+    ],
+    "face-close-3-mid-e": [
+      "face-close-3-mid-e 0"
+    ],
+    "face-close-3-rounded-o": [
+      "face-close-3-rounded-o 0"
+    ],
+    "face-close-3-neutral-small": [
+      "face-close-3-neutral-small 0"
+    ],
+    "face-close-3-bilabial-m": [
+      "face-close-3-bilabial-m 0"
+    ],
+    "face-close-3-labiodental-f": [
+      "face-close-3-labiodental-f 0"
+    ],
+    "face-close-4-rest": [
+      "face-close-4-rest 0"
+    ],
+    "face-close-4-open-a": [
+      "face-close-4-open-a 0"
+    ],
+    "face-close-4-mid-e": [
+      "face-close-4-mid-e 0"
+    ],
+    "face-close-4-rounded-o": [
+      "face-close-4-rounded-o 0"
+    ],
+    "face-close-4-neutral-small": [
+      "face-close-4-neutral-small 0"
+    ],
+    "face-close-4-bilabial-m": [
+      "face-close-4-bilabial-m 0"
+    ],
+    "face-close-4-labiodental-f": [
+      "face-close-4-labiodental-f 0"
+    ],
+    "face-closed-rest": [
+      "face-closed-rest 0"
+    ],
+    "face-closed-open-a": [
+      "face-closed-open-a 0"
+    ],
+    "face-closed-mid-e": [
+      "face-closed-mid-e 0"
+    ],
+    "face-closed-rounded-o": [
+      "face-closed-rounded-o 0"
+    ],
+    "face-closed-neutral-small": [
+      "face-closed-neutral-small 0"
+    ],
+    "face-closed-bilabial-m": [
+      "face-closed-bilabial-m 0"
+    ],
+    "face-closed-labiodental-f": [
+      "face-closed-labiodental-f 0"
+    ],
+    "face-happy-rest": [
+      "face-happy-rest 0"
+    ],
+    "face-happy-open-a": [
+      "face-happy-open-a 0"
+    ],
+    "face-happy-mid-e": [
+      "face-happy-mid-e 0"
+    ],
+    "face-happy-rounded-o": [
+      "face-happy-rounded-o 0"
+    ],
+    "face-happy-neutral-small": [
+      "face-happy-neutral-small 0"
+    ],
+    "face-happy-bilabial-m": [
+      "face-happy-bilabial-m 0"
+    ],
+    "face-happy-labiodental-f": [
+      "face-happy-labiodental-f 0"
+    ],
+    "face-surprised-rest": [
+      "face-surprised-rest 0"
+    ],
+    "face-surprised-open-a": [
+      "face-surprised-open-a 0"
+    ],
+    "face-surprised-mid-e": [
+      "face-surprised-mid-e 0"
+    ],
+    "face-surprised-rounded-o": [
+      "face-surprised-rounded-o 0"
+    ],
+    "face-surprised-neutral-small": [
+      "face-surprised-neutral-small 0"
+    ],
+    "face-surprised-bilabial-m": [
+      "face-surprised-bilabial-m 0"
+    ],
+    "face-surprised-labiodental-f": [
+      "face-surprised-labiodental-f 0"
+    ]
+  },
+  "meta": {
+    "image": "expressions.png",
+    "size": {
+      "w": 896,
+      "h": 1536
+    },
+    "scale": "1"
+  }
+}

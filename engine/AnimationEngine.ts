@@ -10,19 +10,17 @@ import { MOUTH_SHAPES } from '@/tts/LipSyncMapper';
 const DISPLAY_SCALE = 2;
 
 /** Eye states in order matching eyes.png frame columns */
-const EYE_STATES: EyeState[] = ['open', 'half', 'closed', 'happy', 'surprised'];
+const EYE_STATES: EyeState[] = ['open', 'close-1', 'close-2', 'close-3', 'close-4', 'closed', 'happy', 'surprised'];
 
 /** ms per idle frame */
-const IDLE_FRAME_DURATION = 160;
-const IDLE_FRAME_COUNT = 6;
+const IDLE_FRAME_DURATION = 80;
+const IDLE_FRAME_COUNT = 12;
 
 /** Max delta-time to prevent large jumps on lag/tab switch */
 const MAX_DELTA_MS = 50;
 
 interface SpriteLayers {
-  body:  PIXI.Sprite;
-  eyes:  PIXI.Sprite;
-  mouth: PIXI.Sprite;
+  body: PIXI.Sprite;
 }
 
 interface HeadShift {
@@ -74,6 +72,7 @@ export class AnimationEngine {
   private bodyTextures:  Record<string, PIXI.Texture> = {};
   private mouthTextures: Record<MouthShape, PIXI.Texture> = {} as Record<MouthShape, PIXI.Texture>;
   private eyeTextures:   Record<EyeState, PIXI.Texture> = {} as Record<EyeState, PIXI.Texture>;
+  private expressionTextures: Record<string, PIXI.Texture> = {};
 
   /** Per-frame head shift offsets — loaded from sprite-meta.json */
   private headShifts: Record<string, HeadShift[]> = {};
@@ -173,6 +172,16 @@ export class AnimationEngine {
       const key = `eyes-${state} 0`;
       this.eyeTextures[state] = (eyesSheet.textures as Record<string, PIXI.Texture>)[key];
     }
+
+    // Expressions spritesheet
+    try {
+      const exprSheet = await PIXI.Assets.load<PIXI.Spritesheet>('/sprites/expressions.json');
+      if (exprSheet && exprSheet.textures) {
+        this.expressionTextures = exprSheet.textures as Record<string, PIXI.Texture>;
+      }
+    } catch {
+      // Ignored if expressions are not built
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -183,15 +192,11 @@ export class AnimationEngine {
     const character = new PIXI.Container();
     character.scale.set(DISPLAY_SCALE);
 
-    const body  = new PIXI.Sprite(this.bodyTextures['idle 0']);
-    const eyes  = new PIXI.Sprite(this.eyeTextures['open']);
-    const mouth = new PIXI.Sprite(this.mouthTextures['rest']);
+    const body = new PIXI.Sprite(this.bodyTextures['idle 0']);
 
     character.addChild(body);
-    character.addChild(eyes);
-    character.addChild(mouth);
 
-    this.layers = { body, eyes, mouth };
+    this.layers = { body };
     this.app.stage.addChild(character);
   }
 
@@ -201,11 +206,8 @@ export class AnimationEngine {
 
   private attachStateMachineListener() {
     this.unsubscribe = this.sm.onChange((state) => {
-      const mouthTex = this.mouthTextures[state.mouth];
-      if (mouthTex) this.layers.mouth.texture = mouthTex;
-
-      const eyeTex = this.eyeTextures[state.eyes];
-      if (eyeTex) this.layers.eyes.texture = eyeTex;
+      // The render loop updates the body texture directly
+      // using the combined static expression frames. No overlays to update here.
     });
   }
 
@@ -239,6 +241,19 @@ export class AnimationEngine {
   }
 
   private setBodyFrame(anim: BodyAnimation, frame: number) {
+    if (anim === 'idle' && this.sm && Object.keys(this.expressionTextures).length > 0) {
+      const state = this.sm.getState();
+      const comboKey = `face-${state.eyes}-${state.mouth} 0`;
+      const tex = this.expressionTextures[comboKey];
+      
+      if (tex) {
+        if (this.layers.body.texture !== tex) {
+          this.layers.body.texture = tex;
+        }
+        return;
+      }
+    }
+
     const key = `${anim} ${frame}`;
     const tex = this.bodyTextures[key];
     if (tex && this.layers.body.texture !== tex) {
@@ -246,35 +261,7 @@ export class AnimationEngine {
     }
   }
 
-  /**
-   * Reposition eyes and mouth overlay sprites to follow the head.
-   * Uses the per-frame head shift data from sprite-meta.json.
-   * Smoothly interpolates between positions to prevent jitter.
-   */
   private updateOverlayPositions(anim: BodyAnimation, frame: number) {
-    const shifts = this.headShifts[anim];
-    let targetDx = 0;
-    let targetDy = 0;
-
-    if (shifts && frame < shifts.length) {
-      targetDx = shifts[frame].x;
-      targetDy = shifts[frame].y;
-    }
-
-    // Smooth interpolation to prevent jerky overlay movement
-    const lerpSpeed = 0.3;
-    this.currentHeadDx += (targetDx - this.currentHeadDx) * lerpSpeed;
-    this.currentHeadDy += (targetDy - this.currentHeadDy) * lerpSpeed;
-
-    // Snap to integer pixels (for pixel-perfect rendering) when very close
-    const dx = Math.abs(this.currentHeadDx - targetDx) < 0.1
-      ? targetDx : Math.round(this.currentHeadDx);
-    const dy = Math.abs(this.currentHeadDy - targetDy) < 0.1
-      ? targetDy : Math.round(this.currentHeadDy);
-
-    this.layers.eyes.x = dx;
-    this.layers.eyes.y = dy;
-    this.layers.mouth.x = dx;
-    this.layers.mouth.y = dy;
+    // Overlays have been removed; all states use full-body frames to prevent jitter.
   }
 }

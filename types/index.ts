@@ -34,7 +34,7 @@ export type MouthShape =
   | 'labiodental-f';
 
 /** Eye state names matching spritesheet animation keys */
-export type EyeState = 'open' | 'half' | 'closed' | 'happy' | 'surprised';
+export type EyeState = 'open' | 'close-1' | 'close-2' | 'close-3' | 'closed' | 'happy' | 'surprised';
 
 /** Body animation names matching spritesheet animation keys */
 export type BodyAnimation = 'idle' | 'walk' | 'wave' | 'shrug' | 'nod' | 'shake-head' | 'point';
