@@ -45,7 +45,7 @@ const MAX_COLS = 20;
 const NUM_ROWS = ANIMATIONS.length;
 
 const MOUTH_SHAPES = [
-  'rest', 'open-a', 'mid-e', 'rounded-o', 'neutral-small', 'bilabial-m', 'labiodental-f'
+  'rest', 'talk-1', 'talk-2', 'talk-3', 'talk-4', 'talk-5'
 ];
 const EYE_STATES = ['open', 'close-1', 'close-2', 'close-3', 'close-4', 'closed', 'happy', 'surprised'];
 
@@ -763,11 +763,22 @@ function drawEyesOnTile(tile, face, state, baseTile) {
 function drawMouthOnTile(tile, face, shape, baseTile) {
   if (shape === 'rest') return;
 
+  const match = shape.match(/talk-(\d)/);
+  if (!match) return;
+  
+  const dropH = parseInt(match[1], 10);
+  if (dropH === 0) return;
+
+  let indent = 0;
+  if (dropH === 4) indent = 1; // Narrow O shape
+
   const mx = face.mouthX, my = face.mouthY;
   const mw = face.mouthW, mh = face.mouthH;
 
   let minMY = mh, maxMY = 0;
   let minMX = mw, maxMX = 0;
+  const bottomY = new Array(mw).fill(-1);
+
   for (let y = 0; y < mh; y++) {
     for (let x = 0; x < mw; x++) {
       const p = baseTile.get(mx + x, my + y);
@@ -777,97 +788,45 @@ function drawMouthOnTile(tile, face, shape, baseTile) {
         if (y > maxMY) maxMY = y;
         if (x < minMX) minMX = x;
         if (x > maxMX) maxMX = x;
+        bottomY[x] = y;
       }
     }
   }
-  if (minMY > maxMY) { minMY = Math.floor(mh/4); maxMY = Math.floor(mh*3/4); minMX = 2; maxMX = mw-3; }
 
-  const actualW = maxMX - minMX + 1;
-  const actualH = maxMY - minMY + 1;
-  const midMY = minMY + Math.floor(actualH / 2);
+  if (minMY > maxMY) { minMY = Math.floor(mh/4); maxMY = minMY; minMX = 2; maxMX = mw-3; bottomY.fill(maxMY); }
 
-  if (shape === 'open-a') {
-    for (let y = 0; y < mh; y++) {
-      for (let x = 0; x < mw; x++) {
-        if (y < midMY) {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
-        } else if (y === midMY) {
-          const p = baseTile.get(mx + x, my + y);
-          const isSkin = Math.abs(p[0]-face.skinColor[0])<40 && Math.abs(p[1]-face.skinColor[1])<40 && Math.abs(p[2]-face.skinColor[2])<40;
-          if (x >= minMX + 1 && x <= maxMX - 1 && !isSkin) {
-            tile.set(mx + x, my + y, [60, 20, 20, 255]);
-          } else {
-            tile.set(mx + x, my + y, p);
-          }
+  let darkestColor = [40, 20, 20, 255];
+  let minLuma = 999;
+  for (let y = minMY; y <= maxMY; y++) {
+    for (let x = minMX; x <= maxMX; x++) {
+       const p = baseTile.get(mx + x, my + y);
+       if (p[3] > 0) {
+          const luma = 0.299*p[0] + 0.587*p[1] + 0.114*p[2];
+          if (luma < minLuma) { minLuma = luma; darkestColor = p; }
+       }
+    }
+  }
+
+  for (let x = minMX - 1; x <= maxMX + 1; x++) {
+     const by = bottomY[x] !== undefined ? bottomY[x] : -1;
+     if (by === -1) continue;
+
+     if (indent > 0) {
+        if (x < minMX + indent || x > maxMX - indent) continue;
+     }
+
+     for (let y = by + 1; y <= by + dropH + 2; y++) {
+        if (y <= by + dropH) {
+           tile.set(mx + x, my + y, darkestColor);
         } else {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y - 1));
+           const srcY = y - dropH - 1;
+           const px = baseTile.get(mx + x, my + srcY);
+           const pxIsSkin = Math.abs(px[0]-face.skinColor[0])<40 && Math.abs(px[1]-face.skinColor[1])<40 && Math.abs(px[2]-face.skinColor[2])<40;
+           if (!pxIsSkin && px[3] > 0) {
+              tile.set(mx + x, my + y, px);
+           }
         }
-      }
-    }
-  } else if (shape === 'mid-e') {
-    for (let y = 0; y < mh; y++) {
-      for (let x = 0; x < mw; x++) {
-         tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
-      }
-    }
-    tile.set(mx + minMX - 1, my + midMY, baseTile.get(mx + minMX, my + midMY));
-    tile.set(mx + maxMX + 1, my + midMY, baseTile.get(mx + maxMX, my + midMY));
-  } else if (shape === 'rounded-o') {
-    for (let y = 0; y < mh; y++) {
-      for (let x = 0; x < mw; x++) {
-        if (x === minMX || x === maxMX) {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + (y < midMY ? minMY-1 : maxMY+1)));
-        } else if (y === midMY) {
-          if (x > minMX && x < maxMX) tile.set(mx + x, my + y, [60, 20, 20, 255]);
-        } else if (y > midMY) {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y - 1));
-        } else {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
-        }
-      }
-    }
-  } else if (shape === 'neutral-small') {
-    for (let y = 0; y < mh; y++) {
-      for (let x = 0; x < mw; x++) {
-        if (y > midMY && x > minMX && x < maxMX) {
-           tile.set(mx + x, my + y, baseTile.get(mx + x, my + y - 1));
-        } else if (y === midMY && x > minMX && x < maxMX) {
-           tile.set(mx + x, my + y, [60, 20, 20, 255]);
-        } else {
-           tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
-        }
-      }
-    }
-  } else if (shape === 'bilabial-m') {
-    for (let y = 0; y < mh; y++) {
-      for (let x = 0; x < mw; x++) {
-        if (y === midMY) {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
-        } else if (y >= minMY && y <= maxMY) {
-          const p = baseTile.get(mx + x, my + y);
-          const isSkin = Math.abs(p[0]-face.skinColor[0])<40 && Math.abs(p[1]-face.skinColor[1])<40 && Math.abs(p[2]-face.skinColor[2])<40;
-          if (!isSkin) {
-             tile.set(mx + x, my + y, baseTile.get(mx + x, y < midMY ? my + minMY - 1 : my + maxMY + 1));
-          } else {
-             tile.set(mx + x, my + y, p); 
-          }
-        }
-      }
-    }
-  } else if (shape === 'labiodental-f') {
-    for (let y = 0; y < mh; y++) {
-      for (let x = 0; x < mw; x++) {
-        if (y < midMY) {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
-        } else if (y === midMY && x > minMX && x < maxMX) {
-          tile.set(mx + x, my + y, [245, 245, 240, 255]); 
-        } else if (y > midMY && y <= maxMY + 1) {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y - 1));
-        } else {
-          tile.set(mx + x, my + y, baseTile.get(mx + x, my + y));
-        }
-      }
-    }
+     }
   }
 }
 

@@ -26,12 +26,11 @@ export interface TTSResponse {
 /** Mouth shape names matching spritesheet animation keys */
 export type MouthShape =
   | 'rest'
-  | 'open-a'
-  | 'mid-e'
-  | 'rounded-o'
-  | 'neutral-small'
-  | 'bilabial-m'
-  | 'labiodental-f';
+  | 'talk-1'
+  | 'talk-2'
+  | 'talk-3'
+  | 'talk-4'
+  | 'talk-5';
 
 /** Eye state names matching spritesheet animation keys */
 export type EyeState = 'open' | 'close-1' | 'close-2' | 'close-3' | 'closed' | 'happy' | 'surprised';

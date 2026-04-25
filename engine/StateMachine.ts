@@ -51,10 +51,43 @@ export class StateMachine {
 
   // ---- Overlay state transitions ----
 
+  private mouthTweenTimeout: NodeJS.Timeout | null = null;
+  private currentMouthLevel: number = 0;
+  private targetMouthLevel: number = 0;
+
   setMouth(shape: MouthShape) {
-    if (this.state.mouth !== shape) {
-      this.patch({ mouth: shape });
+    const targetLvl = this.getMouthLevel(shape);
+    if (this.state.mouth === shape && this.targetMouthLevel === targetLvl) return;
+    
+    this.targetMouthLevel = targetLvl;
+    if (!this.mouthTweenTimeout) {
+      this.stepMouth();
     }
+  }
+
+  private getMouthLevel(shape: MouthShape): number {
+    if (shape === 'rest') return 0;
+    const m = shape.match(/talk-(\d)/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
+  private stepMouth() {
+    if (this.currentMouthLevel === this.targetMouthLevel) {
+      this.mouthTweenTimeout = null;
+      return;
+    }
+
+    if (this.currentMouthLevel < this.targetMouthLevel) {
+      this.currentMouthLevel++;
+    } else {
+      this.currentMouthLevel--;
+    }
+
+    const nextShape: MouthShape = this.currentMouthLevel === 0 ? 'rest' : `talk-${this.currentMouthLevel}` as MouthShape;
+    this.patch({ mouth: nextShape });
+
+    // Step quickly (15ms) to keep up with fast viseme streams while maintaining smoothness
+    this.mouthTweenTimeout = setTimeout(() => this.stepMouth(), 15);
   }
 
   setEyes(state: EyeState) {
